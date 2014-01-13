@@ -1,0 +1,131 @@
+#!/bin/bash
+
+
+function Comprobar_parametros()
+{
+
+	if [ $# -eq 0 ]
+	then
+		return $ERR_NO_PARAM
+	fi	
+
+	if [ $# -eq 1 ]
+	then
+		return $ERR_POC_PARAM
+	fi
+
+	if [ $# -gt 2 ]
+	then
+		return $ERR_MUC_PARAM
+	fi
+
+	for k in $*
+	do
+		h=`expr $k + 1 2>/dev/null`
+
+		if [ $? -eq $TRUE ]
+		then
+			:
+		else
+			return $ERR_PARAM_TIP_DESC
+		fi
+	done
+
+
+	if [ $1 -gt 15 ]
+	then
+		return $ERR_NUM_SORT_MAY
+	fi
+
+	if [ $2 -gt 10 ]
+	then
+		return $ERR_JUG_MAYOR
+	fi
+
+	if [ $1 -eq 0 ]
+	then
+		return $ERR_SORT_NO_CERO
+	fi
+
+	if [ $2 -eq 0 ]
+	then
+		return $ERR_JUG_NO_CERO
+	fi
+
+	
+	
+
+}
+
+#Comprueba si existe fichero y los borra
+function Comprobar_ficheros()
+{
+	numfich=`ls | egrep '^S[0-9]|[0-9][0-9]R$' | wc -l`
+	
+	if [ $numfich -eq 0 ]
+	then 
+		#Puedo seguir
+		echo no hay k borrar
+	else
+		#Hay que borrar ficheros
+		fich=`ls | egrep '^S[0-9]|[0-9][0-9]R$'`
+		rm -f $fich
+	fi
+}
+
+
+Comprobar_combinaciones()
+{
+	
+	#Mete en SnR los nombres de los ficheros
+	for SnR in `echo $ficheros`
+	do
+		cont=1
+		#Aqui introduzco los premios en el array
+		while read premios
+		do
+			#Compruebo que se salte la primera linea si está
+			h=`expr $premios + 1 2>/dev/null`
+
+			if [ $? -eq $TRUE ]
+			then
+				ARRAY[$cont]=`expr ${ARRAY[$cont]} + $premios`
+				cont=`expr $cont + 1`
+
+			else
+				:
+			fi
+		done < "$SnR"
+	done 
+
+
+	
+}
+
+
+#Imprimir todos los resultados con el formato correcto
+Mostrar_resultados()
+{
+	clear
+	echo ===================================================
+	echo ===================================================
+	echo
+
+	echo Informe de resultados.
+	echo Numero de sorteos: $1  Numero de jugadores: $2
+	echo 
+
+	for i in `seq $2`
+	do
+		echo Jugador: $i' --- 'Total Premio '-->' ${ARRAY[$i]} €
+	done
+	
+	echo
+	echo ===================================================
+	echo ===================================================
+}
+
+
+
+
+

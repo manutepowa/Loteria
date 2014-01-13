@@ -1,0 +1,98 @@
+#!/bin/bash
+
+
+#Loteria
+
+declare -r TRUE=0   #correcto
+declare -r FALSE=1    #incorrecto
+
+declare -r ERR_NO_PARAM=2    #no tiene parametros
+declare -r ERR_POC_PARAM=3    #tiene solo 1 parametro
+declare -r ERR_MUC_PARAM=4    #tiene demasiados parametros
+declare -r ERR_PARAM_TIP_DESC=5   #parametros != numero
+declare -r ERR_NUM_SORT_MAY=6   #sorteos > 15
+declare -r ERR_JUG_MAYOR=7    #jugadores > 10
+declare -r ERR_SORT_NO_CERO=8   #sorteo = 0
+declare -r ERR_JUG_NO_CERO=9   #jugadores = 0
+declare -r ERR_PARAM_ERRONEO=10  #Los parametros tienen letras
+
+
+. ./comprobar
+
+#Comprobamos que los parametros tienen el formato correcto
+Comprobar_parametros $*
+
+case "$?" in
+	"2") clear
+		 echo -e "No tiene parametros.\n-----------------------------------------------------------\nHay que introducir dos parametros, los cuales deben ser numeros entre 1 y 15 para los sorteos(1 param) y numeros entre 1 y 10 para los jugadores(2 param).\nLos parametros introducidos fuera de este rango produce este error.\n--------------------------------------------------------------- "
+		exit 0;;
+	"3") clear
+		 echo -e "Solo tiene un parametro.\n-----------------------------------------------------------\nLos parametros introducidos deben ser dos parametros, los cuales deben ser numeros entre 1 y 15 para los sorteos(1 param) y numeros entre 1 y 10 para los jugadores(2 param).\nLos parametros introducidos fuera de este rango produce este error.\n--------------------------------------------------------------- "
+		exit 0;;
+	"4") clear
+		 echo -e "Tiene demasiados parametros.\n-----------------------------------------------------------\nLos parametros introducidos deben ser dos parametros, los cuales deben ser numeros entre 1 y 15 para los sorteos(1 param) y numeros entre 1 y 10 para los jugadores(2 param).\nLos parametros introducidos fuera de este rango produce este error.\n--------------------------------------------------------------- "
+		exit 0;;
+	"5") clear
+		 echo -e "Los caracteres introducidos deben ser numeros.\n-----------------------------------------------------------\nLos caracteres introducidos deben ser numeros entre 1 y 15.\nLos caracteres introducidos fuera de este rango produce este error.\n--------------------------------------------------------------- "
+		exit 0;;
+	"6") clear
+		 echo -e "Numero de sorteos no puede ser mayor que 15.\n-----------------------------------------------------------\nEl numero introducido de sorteos debe ser entre 1 y 15.\nLos numeros introducidos fuera de este rango produce este error.\n--------------------------------------------------------------- "
+		exit 0;;
+	"7") clear
+		 echo -e "Numero de jugadores no puede ser mayor de 10.\n-----------------------------------------------------------\nEl numero introducido de jugadores debe ser entre 1 y 10.\nLos numeros introducidos fuera de este rango produce este error.\n--------------------------------------------------------------- "
+		exit 0;;
+	"8") clear
+		 echo -e "Numero de sorteos no puede ser cero.\n-----------------------------------------------------------\nEl numero introducido de sorteos debe ser entre 1 y 15.\nLos numeros introducidos fuera de este rango producira un error.\n--------------------------------------------------------------- "
+		exit 0;;
+	"9") clear
+		 echo -e "Numero de jugadores no puede ser cero.\n-----------------------------------------------------------\nEl numero introducido de jugadores debe ser entre 1 y 10.\nLos numeros introducidos fuera de este rango producira un error.\n--------------------------------------------------------------- "
+		exit 0;;
+esac
+
+#Comprobamos si ya hay ficheros y los borramos
+Comprobar_ficheros
+
+
+ 
+#-----------------------------------------
+	
+	for i in `seq $1`
+	do
+		./sorteo $i $2
+	done
+	
+
+#-----------------------------------------
+ 
+
+#borro archivos temporales
+rm *~ 2>/dev/null
+
+#compruebo que se han generado todos
+numfich=`ls | egrep '^S[0-9]|[0-9][0-9]R$' | wc -l`
+if [ $numfich -ne $1 ]
+then 
+	exit
+fi
+
+
+#Nombre de los ficheros
+ficheros=`ls | egrep '^S[0-9]|[0-9][0-9]R$'`
+
+#declaro el array para los premios
+declare ARRAY[$2]
+
+#lo inicializo a 0
+
+for a in `seq $2`
+do
+	ARRAY[a]=0
+done
+
+#compruebo la combinacion
+Comprobar_combinaciones $ficheros $ARRAY
+
+Mostrar_resultados $ARRAY $*
+
+
+
