@@ -9,6 +9,8 @@
 #include "cabecera.h"
 
 
+
+//Hola nestor
 #define WRITE 1
 #define READ 0
 
